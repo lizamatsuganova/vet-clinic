@@ -1,0 +1,29 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: vet-clinic-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: Root12345!Vet
+      MYSQL_DATABASE: vet_clinic
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  app:
+    build: .
+    container_name: vet-clinic-api
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/vet_clinic?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Root12345!Vet
+      APP_JWT_SECRET_BASE64: M91SEMKFOK16eGkO1sRE+JE3snP18BA8mgPVJ493qRw=
+      APP_JWT_EXPIRATION_MS: 86400000
+    ports:
+      - "8080:8080"
